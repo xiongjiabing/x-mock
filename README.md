@@ -17,7 +17,7 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 
     *  x-mock当前具有4个扩展点（CodeCoverage,Describable,Engine,IOCcontainer），用户可以通过扩展点编写自己的插件。
        插件实现原则：
-       *  需要编写某个插件，则需要在资源文件下创建META-INF/xspi/org.xiong.xmock.api.XXX (XXX代表某个插件)文件。
+       *  编写某个插件，则需要在资源文件下创建META-INF/xspi/org.xiong.xmock.api.XXX (XXX代表某个插件)文件。
           文件内容 eg:
               name=mock-engine   //插件名称
               value=org.xiong.xmock.engine.EngineMain   //插件实现类
