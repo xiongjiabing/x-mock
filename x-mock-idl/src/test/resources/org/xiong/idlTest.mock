@@ -1,0 +1,4 @@
+#- { for: userservice.login,   test: abc,  res: {retCode: 0, retMsg: abc},req: xxxx  }
+#- { for: userservice.login1,   test: abc,  res: [{retCode: 0, retMsg: abc},{retCode: 0, retMsg: abc}],req: xxxx  }
+#- { for: userservice.login2,   test: abc,  res: [hh,gg,12,2019-09-09],req: xxxx  }
+- { for: userservice.login,  test: dealIdl,  res: {retCode: 0, retMsg: abc, bob:$now},req: xxxx  }

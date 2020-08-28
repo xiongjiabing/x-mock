@@ -1,0 +1,3 @@
+name=yaml-plugin
+value=org.xiong.xmock.idl.IdlMain
+ordered=100

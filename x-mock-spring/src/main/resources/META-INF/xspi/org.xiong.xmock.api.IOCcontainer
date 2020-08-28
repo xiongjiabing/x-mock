@@ -1,0 +1,3 @@
+name=x-mock-spring
+value=org.xiong.xmock.spring.SpringMain
+ordered=100

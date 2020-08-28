@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>x-mock</artifactId>
+        <groupId>org.xiong.xmock</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
+    <artifactId>x-mock-jacoco</artifactId>
+
+    <dependencies>
+
+
+        <dependency>
+            <groupId>org.xiong.xmock</groupId>
+            <artifactId>x-mock-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.22</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.2.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <!--  must be on the classpath  -->
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <version>0.8.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.core</artifactId>
+            <version>0.8.5</version>
+
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.report</artifactId>
+            <version>0.8.5</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.apache.maven</groupId>-->
+<!--            <artifactId>maven-plugin-api</artifactId>-->
+<!--            <version>3.6.3</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.plugin-tools</groupId>
+            <artifactId>maven-plugin-annotations</artifactId>
+            <version>3.4</version>
+            <!-- annotations are needed only to build the plugin: -->
+<!--            <scope>provided</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.kohsuke.sorcerer</groupId>
+            <artifactId>sorcerer-javac</artifactId>
+            <version>0.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc2</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- report-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.maven.reporting</groupId>-->
+<!--            <artifactId>maven-reporting-impl</artifactId>-->
+<!--            <version>2.1</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.apache.maven.reporting</groupId>-->
+<!--            <artifactId>maven-reporting-api</artifactId>-->
+<!--            <version>3.0</version>-->
+<!--        </dependency>-->
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <!--            <plugin>-->
+<!--                <groupId>org.jacoco</groupId>-->
+<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                <version>0.8.2</version>-->
+<!--                <configuration>-->
+<!--                    <includes>-->
+<!--                        <include>com/**/*</include>-->
+<!--                    </includes>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>default-prepare-agent</id>-->
+<!--                        <goals>-->
+<!--                            <goal>prepare-agent</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <propertyName>jacocoArgLine</propertyName>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>jacoco-report</id>-->
+<!--                        <phase>test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>report</goal>-->
+<!--                        </goals>-->
+<!--                        &lt;!&ndash; default target/jscoco/site/* &ndash;&gt;-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>target/jacoco-report</outputDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                <version>2.22.2</version>-->
+<!--                <configuration>-->
+<!--                    <argLine>-Xmx256M ${jacocoArgLine}</argLine>-->
+<!--                    <skip>false</skip>-->
+<!--                    <testFailureIgnore>false</testFailureIgnore>-->
+<!--                    <forkCount>1</forkCount>-->
+<!--                    <reuseForks>true</reuseForks>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+
+        </plugins>
+    </build>
+</project>
