@@ -60,7 +60,7 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 ###内置注解支持
 * @XMock 作用域在test类
 * @AutoInject 作用域在test类属性
-####提示:集成spring后,内置注解均可不用引入
+
 
 ###关于spring的集成
 * 当springboot已经成为主流,x-mock在设计之初并没有考虑对原生spring直接支持。与spring的生态体系结合仅仅建立在springboot之上。
