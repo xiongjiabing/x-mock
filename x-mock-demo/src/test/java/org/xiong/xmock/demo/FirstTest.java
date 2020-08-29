@@ -16,10 +16,16 @@ public class FirstTest {
     FacadeService facadeServiceFirst;
 
     @AutoInject
+    FacadeService facadeServiceFirst1;
+
+    @AutoInject
     FacadeService facadeService;
 
     @Test
     public void first() throws Exception {
+
+         System.out.println( (demoMain.hello()));
+
 
 //        System.out.println( (demoMain.getMgs() ));
 //        System.out.println( (demoMain.getDouble() ));
@@ -29,7 +35,7 @@ public class FirstTest {
 //        System.out.println( (demoMain.getDemoItem() ));
 //        System.out.println("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
 //        System.out.println( facadeServiceFirst.getServerName());
-        System.out.println(facadeServiceFirst.getDemoMain());
+        System.out.println(facadeServiceFirst.getDemoMain(null,null));
     }
 
     @Test

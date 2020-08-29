@@ -47,12 +47,12 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 * 一、基础格式:
    * \- { for-return: org.xiong.xmock.demo.DemoMain.getMgs,  test: dealIdl, return: {retCode: 0, retMsg: abc} } 
      
-   * \- { for-service: facadeServiceFirst  }
+   * \- { for-service: org.xiong.xmock.demo.FacadeService=facadeService  }
    *  for-return: 代表需要mock的目标方法，当方法出现重载时，需要指定方法签名，可以单独使用也可以与for-field搭配
    *  test: 当前mock的作用域，多个用 ,号分割。允许为空,则代表为当前Test类全部范围
    *  return: 方法返回值可为 []、{}、某个值。仅仅和for-return搭配
-   *  for-service: 当for-return的mock对象注入到指定的服务时，需要指定目标服务的名称,多个_下划线分割或者另起一行。
-     可选的，为空则根据类型匹配进行注入。建议相同的接口类型写在一起。
+   *  for-service: 当for-return的mock对象注入到指定的服务时，可以指定目标服务的名称。可选的，为空则根据类型匹配进行注入。
+       建议仅仅需要共享公共类型时，可以用_下划线连接服务名，否则单个指定即可。
    *  sleep: 模拟接口处理时间,默认单位为 ms，可选的,仅仅和for-return搭配
    *  throw: 异常模拟,支持2种可选值:runtime、timeout
  

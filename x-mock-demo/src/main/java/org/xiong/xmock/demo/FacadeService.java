@@ -12,4 +12,7 @@ public interface FacadeService {
     List<DemoItem> getList();
 
     List<Map<String,DemoItem>> getMapping();
+
+    DemoItem getDemoMain(String arg,Map<String,List<DemoItem>> map);
+
 }

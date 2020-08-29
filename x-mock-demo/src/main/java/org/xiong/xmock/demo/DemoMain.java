@@ -25,8 +25,9 @@ public class DemoMain {
 //               }
     }
 
-    public void hello(){
+    public Map<String,String> hello(){
         System.out.println("第一个字节码修改。。。");
+        return null;
     }
 
     public String getMgs(){

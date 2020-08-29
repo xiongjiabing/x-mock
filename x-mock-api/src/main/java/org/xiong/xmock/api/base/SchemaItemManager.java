@@ -38,7 +38,11 @@ public class SchemaItemManager {
             schemaItems.forEach( item->{
                 String serviceTag = item.getService();
                 String[] serviceArr = serviceTag.split("=");
-                serverMap.putIfAbsent( serviceArr[1],serviceArr[0] );
+                String [] serviceNames = serviceArr[1].split("_");
+
+                for ( String name : serviceNames ) {
+                    serverMap.putIfAbsent( name, serviceArr[0]);
+                }
 
             });
         });

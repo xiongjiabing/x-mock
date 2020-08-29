@@ -17,18 +17,27 @@ public class SchemaItem {
     String mockTargetFieldName;
 
     public String getMockTargetClassSimpleName(){
-        if( mockTargetClassSimpleName == null )
-            this.mockTargetClassSimpleName = this.forName.substring(0,forName.lastIndexOf("."));
+
+        if( this.mockTargetClassSimpleName == null ){
+            if( !this.forName.contains("(") ){
+                this.forName = this.forName.concat("(");
+            }
+            String forNamePrefix = this.forName.substring( 0 ,this.forName.indexOf("(") );
+            this.mockTargetClassSimpleName = forNamePrefix.substring( 0, forNamePrefix.lastIndexOf(".") );
+        }
         return this.mockTargetClassSimpleName;
     }
 
     public String getMockTargetMethodName(){
-        if( this.mockTargetMethodName == null )
-              this.mockTargetMethodName = this.forName.substring(forName.lastIndexOf(".")+1);
-        if( !mockTargetMethodName.endsWith(")"))
-            mockTargetMethodName = mockTargetMethodName.concat("(");
 
-        return mockTargetMethodName;
+        if( this.mockTargetMethodName == null ) {
+            String forNamePrefix = this.forName.substring(0, this.forName.indexOf("("));
+            String methodSign = this.forName.substring(this.forName.indexOf("("));
+
+            this.mockTargetMethodName = forNamePrefix
+                    .substring(forNamePrefix.lastIndexOf(".") + 1).concat(methodSign);
+        }
+        return this.mockTargetMethodName;
     }
 
     public String getMockTargetFieldName(){
