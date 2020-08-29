@@ -27,6 +27,7 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 
 
 ##使用指南
+
 ###模式
 * x-mock主要有2种模式:server、client(默认client)
 * 可以在项目的资源文件bootstrap.properties 添加 xmock.model=server
@@ -37,7 +38,9 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 * 2、client模式下针对junit test增强。当创建一个test case类时，需要在test/resources文件下创建与该test case类同路径同名的.mock文件
 
 ####重要:所有的测试类都必须以Test结尾，mock文件同理。(仅仅针对client模式)
+
 ####重要:所有的mock文件都必须遵循yaml风格
+
 ####提示:具体请详见x-mock-demo
 
 ###yaml mock文件 配置使用说明
