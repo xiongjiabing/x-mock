@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>org.xiong.xmock</groupId>
-            <artifactId>k-mock-core</artifactId>
+            <artifactId>x-mock-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

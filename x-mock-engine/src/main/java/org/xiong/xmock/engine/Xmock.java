@@ -2,13 +2,13 @@ package org.xiong.xmock.engine;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
-import org.xiong.xmock.engine.annotation.XMock;
-import org.xiong.xmock.api.IOCcontainer;
+import org.springframework.stereotype.Service;
 import org.xiong.xmock.api.base.*;
 import java.lang.reflect.Method;
 import lombok.SneakyThrows;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Xmock {
 
@@ -20,7 +20,7 @@ public class Xmock {
                 .forEach((targetMockClassName ,methodMappin )->{
 
                     Object mockInstance;
-                    Class clazz = ReflectionUtils.getClass(targetMockClassName);
+                    Class clazz = ReflectionUtils.getClass( targetMockClassName );
                     if( clazz.isInterface() ){
                         //if interface, by manual generate proxy object
                         mockInstance = JavassistProxyFactory.getProxy( clazz , JavassistProxyFactory.getHandler( methodMappin ));
@@ -28,20 +28,20 @@ public class Xmock {
                     } else {
                         // if ordinary Class,by high-level api generate proxy object
                         mockInstance = mock( clazz );
+
+                        Service serviceAnno =  (Service)clazz.getDeclaredAnnotation( Service.class );
+                        if ( serviceAnno != null && !isBlank( serviceAnno.value())
+                                && !serviceName.containsKey(serviceAnno.value()) ){
+                            serviceName.put( serviceAnno.value(), clazz.getName() );
+                        }
                         new Binder( mockInstance,methodMappin).bindReturnHandler();
 
                     }
                     //by x-mock framework inject
-                    ClassScanner.scanByAnnoAndInject( XMock.class,clazz,source,mockInstance,serviceName
+                    ReflectionUtils.inject( clazz,source,mockInstance,serviceName
                             ,"org.xiong.xmock.engine.annotation.AutoInject"
                             ,"javax.annotation.Resource"
                             ,"org.springframework.beans.factory.annotation.Autowired" );
-
-                    //if exist ioc container,by container inject
-                    IOCcontainer iOCcontainer = ContainerManger.getContainer( IOCcontainer.class );
-                    if( iOCcontainer != null ) {
-                        iOCcontainer.inject( clazz, mockInstance, serviceName );
-                    }
         });
     }
 

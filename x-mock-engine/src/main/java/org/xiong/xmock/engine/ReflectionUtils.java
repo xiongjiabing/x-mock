@@ -4,15 +4,19 @@ import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javax.annotation.Resource;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.HashMap;
+import java.util.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class ReflectionUtils {
 
     static Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
-
     static Class<?>[] dummyTypes = new Class<?>[0];
     static Object[] dummyParameters = new Object[0];
     static Class<?>[] callableTypes = new Class<?>[]{String.class};
+    static boolean isSet;
 
     @SneakyThrows
     public static Class<?> getClass(String s)  {
@@ -186,4 +190,205 @@ public class ReflectionUtils {
     }
 
 
+    static boolean allow( Object sourceInstance ){
+        Annotation[] annotations = sourceInstance.getClass().getAnnotations();
+        if( annotations != null ){
+            for( Annotation anno : annotations ){
+                if( anno.annotationType().getName().equals("org.springframework.stereotype.Service")
+                        || anno.annotationType().getName().equals("org.springframework.stereotype.Component")
+                        || anno.annotationType().getName().equals("org.springframework.web.bind.annotation.RestController")
+                        || anno.annotationType().getName().equals("org.xiong.xmock.engine.annotation.XMock")
+                        || anno.annotationType().getName().equals("org.junit.runner.RunWith")
+                ){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static void inject (
+            Class proxyType,Object sourceInstance
+            ,Object proxyValue, Map<String,String> serviceName
+            ,String ... fieldAnno ){
+
+        injectByType( proxyType ,sourceInstance ,proxyValue ,serviceName,fieldAnno );
+
+        if( serviceName.size() > 0 ) {
+            injectByName( proxyType, sourceInstance, proxyValue, serviceName, fieldAnno);
+        }
+    }
+
+    static void injectByName (
+             Class proxyType,Object sourceInstance
+            ,Object proxyValue, Map<String,String> serviceName
+            ,String ... fieldAnno ) {
+
+        if( sourceInstance == null || !allow( sourceInstance) ){
+            return;
+        }
+
+        Field[] fields = sourceInstance.getClass().getDeclaredFields();
+        for ( Field f : fields ) {
+
+            String targetServiceName;
+            String serviceAliasName = getTargetServiceAliasName(f);
+            if ( isBlank( serviceAliasName ) ) {
+                targetServiceName = serviceName.get(f.getName());
+            } else {
+                targetServiceName = serviceName.get(serviceAliasName);
+            }
+
+            if ( isBlank( targetServiceName )
+                    || !targetServiceName.equals( proxyType.getName() )
+                    || !assignment( f, proxyType, sourceInstance, proxyValue, fieldAnno )) {
+
+                injectByName( proxyType ,getFieldValue(f, sourceInstance),proxyValue ,serviceName, fieldAnno );
+            }
+        }
+    }
+
+    static void injectByType(
+            Class proxyType
+            ,Object sourceInstance
+            ,Object proxyValue,Map<String,String> serviceName
+            ,String ... fieldAnno ){
+
+        if( sourceInstance == null || !allow( sourceInstance) ){
+            return;
+        }
+
+        Field[] fields = sourceInstance.getClass().getDeclaredFields();
+        //by default type inject
+        for ( Field f : fields ) {
+
+            String targetServiceName = null ;
+            if( serviceName.size() > 0 ) {
+                String serviceAliasName = getTargetServiceAliasName(f);
+                if (isBlank(serviceAliasName)) {
+                    targetServiceName = serviceName.get(f.getName());
+                } else {
+                    targetServiceName = serviceName.get(serviceAliasName);
+                }
+            }
+
+            if( !isBlank( targetServiceName )
+                   || !assignment(f, proxyType, sourceInstance, proxyValue , fieldAnno) ){
+
+                injectByType( proxyType ,getFieldValue(f, sourceInstance) ,proxyValue,serviceName, fieldAnno );
+            }
+        }
+    }
+
+
+    public static void scanByAnnoAndInject(
+            Class<? extends Annotation> typeAnno
+            ,Class proxyType,Object sourceInstance
+            ,Object proxyValue, Map<String,String> serviceName
+            ,String ... fieldAnno ) {
+
+        Class sourceType = sourceInstance.getClass();
+        Annotation clzAnno = sourceType.getAnnotation(typeAnno);
+
+        if ( clzAnno != null )
+            instanceInjection( sourceInstance.getClass(), proxyType, sourceInstance ,proxyValue ,serviceName, fieldAnno);
+    }
+
+    static void instanceInjection(Class clz,Class proxyType,Object sourceInstance
+            ,Object proxyValue, Map<String,String> serviceName,String ... fieldAnno){
+
+        Field[] fields = clz.getDeclaredFields();
+
+        //if user specify service's alias. so,by alias inject
+        if( serviceName.size() > 0 ) {
+            for (Field f : fields) {
+
+                String targetServiceName;
+                String serviceAliasName = getTargetServiceAliasName(f);
+                if (isBlank(serviceAliasName)) {
+                    targetServiceName = serviceName.get(f.getName());
+                } else {
+                    targetServiceName = serviceName.get(serviceAliasName);
+                }
+
+                if (!isBlank(targetServiceName) && targetServiceName.equals(proxyType.getName())) {
+                    assignment(f, proxyType, sourceInstance, proxyValue, fieldAnno);
+                    return;
+                }
+            }
+        }
+
+        //by default type inject
+        for (Field f : fields) {
+            assignment(f, proxyType, sourceInstance, proxyValue , fieldAnno);
+        }
+    }
+
+    static String getTargetServiceAliasName( Field f ){
+
+        Annotation [] annotations = f.getAnnotations();
+        for( Annotation anno : annotations ){
+            if( anno.annotationType().getName().equals("javax.annotation.Resource") ){
+                Resource resource = (Resource)anno;
+                return resource.name();
+            }
+        }
+        return null;
+    }
+
+    static boolean hasAnnotation( Field f, String ... fieldAnno ){
+
+        Annotation [] annotations = f.getAnnotations();
+        for( Annotation an : annotations ){
+            for( String annoName : fieldAnno ){
+                if(an.annotationType().getName().equals( annoName )){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static boolean assignment(Field f , Class type
+            ,Object instance,Object value,String ... fieldAnno ){
+
+        if( hasAnnotation( f, fieldAnno )
+                && f.getType().isAssignableFrom(type)){
+            f.setAccessible(true);
+            try {
+                f.set(instance,value);
+                return true;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    static Object getFieldValue( Field field, Object o ) {
+        try {
+            field.setAccessible(true);
+            Object value = field.get( o );
+            return value;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    static List getFiledsInfo(Object o , String ... fieldAnno) {
+        Field[] fields = o.getClass().getDeclaredFields();
+        List list = new ArrayList();
+        Map infoMap = null;
+        for (int i = 0; i < fields.length; i++) {
+            if( hasAnnotation(fields[i], fieldAnno )){
+                infoMap = new HashMap();
+                infoMap.put("type", fields[i].getType());
+                infoMap.put("name", fields[i].getName());
+                infoMap.put("value", getFieldValue(fields[i], o));
+                list.add(infoMap);
+            }
+        }
+        return list;
+    }
 }

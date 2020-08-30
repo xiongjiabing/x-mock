@@ -12,7 +12,7 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 
 ##设计原则
 * Micro kernel+plug-in
-    *   k-mock-core为核心，不做具体业务操作。仅仅对各个插件进行调度管理、生命周期的编排工作。实际业务操作由各插件实现。
+    *   x-mock-core为核心，不做具体业务操作。仅仅对各个插件进行调度管理、生命周期的编排工作。实际业务操作由各插件实现。
         每个插件都是独立存在,可以灵活做到加载、替换。
 
     *  x-mock当前具有4个扩展点（CodeCoverage,Describable,Engine,IOCcontainer），用户可以通过扩展点编写自己的插件。
@@ -23,7 +23,7 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
               value=org.xiong.xmock.engine.EngineMain   //插件实现类
               ordered=100  //加载优先级。 可选的。 值越小，优先加载。
               
-* ![xmock](x-mock.png)
+* ![xmock](xmock.png)
 
 
 ##使用指南

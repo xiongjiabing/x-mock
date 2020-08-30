@@ -24,7 +24,7 @@ public class FirstTest {
     @Test
     public void first() throws Exception {
 
-         System.out.println( (demoMain.hello()));
+//         System.out.println( (demoMain.hello()));
 
 
 //        System.out.println( (demoMain.getMgs() ));

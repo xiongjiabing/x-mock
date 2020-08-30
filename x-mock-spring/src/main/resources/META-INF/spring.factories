@@ -1,1 +1,2 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.xiong.xmock.spring.AutoConfiguration
+org.springframework.boot.SpringApplicationRunListener=\
+com.binance.fiat.service.web.service.ocbs.validators.ValidateListener

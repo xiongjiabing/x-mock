@@ -7,5 +7,5 @@ import java.util.Map;
 @Xspi(name = "iOCcontainer")
 public interface IOCcontainer extends Container {
 
-    public void inject( Class type, Object mockInstance, Map<String,String> serviceName );
+    public <T> void inject( Class<T> type, Object mockInstance, Map<String,String> serviceName );
 }
