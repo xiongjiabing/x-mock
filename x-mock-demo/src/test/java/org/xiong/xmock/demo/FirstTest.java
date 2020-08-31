@@ -24,9 +24,7 @@ public class FirstTest {
     @Test
     public void first() throws Exception {
 
-//         System.out.println( (demoMain.hello()));
-
-
+//        System.out.println( (demoMain.hello()));
 //        System.out.println( (demoMain.getMgs() ));
 //        System.out.println( (demoMain.getDouble() ));
 //        System.out.println( (demoMain.getInt() ));
@@ -35,7 +33,10 @@ public class FirstTest {
 //        System.out.println( (demoMain.getDemoItem() ));
 //        System.out.println("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
 //        System.out.println( facadeServiceFirst.getServerName());
-        System.out.println(facadeServiceFirst.getDemoMain(null,null));
+        DiceyEntity diceyEntity = facadeServiceFirst.getDiceyEntity();
+        System.out.println( diceyEntity.getAge()+"==="+diceyEntity.getName()+"==="+diceyEntity.getStatus().name() );
+
+
     }
 
     @Test

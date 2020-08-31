@@ -2,13 +2,15 @@ package org.xiong.xmock.engine;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.xiong.xmock.api.base.*;
 import java.lang.reflect.Method;
 import lombok.SneakyThrows;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class Xmock {
 
@@ -30,9 +32,21 @@ public class Xmock {
                         mockInstance = mock( clazz );
 
                         Service serviceAnno =  (Service)clazz.getDeclaredAnnotation( Service.class );
-                        if ( serviceAnno != null && !isBlank( serviceAnno.value())
-                                && !serviceName.containsKey(serviceAnno.value()) ){
-                            serviceName.put( serviceAnno.value(), clazz.getName() );
+                        String service = null;
+                        if( serviceAnno != null ){
+                            service = serviceAnno.value();
+                            if( isBlank(service) ){
+                                targetMockClassName = targetMockClassName.substring(targetMockClassName.lastIndexOf(".")+1);
+
+                                service = left(targetMockClassName, 1).toLowerCase()
+                                        +right(targetMockClassName,targetMockClassName.length() - 1);
+                            }
+                        }
+
+                        if ( !isBlank( service)
+                                && !serviceName.containsKey(service ) ){
+
+                            serviceName.put( service, clazz.getName() );
                         }
                         new Binder( mockInstance,methodMappin).bindReturnHandler();
 

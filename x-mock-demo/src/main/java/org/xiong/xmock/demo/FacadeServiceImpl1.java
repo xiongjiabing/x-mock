@@ -12,6 +12,11 @@ public class FacadeServiceImpl1 implements FacadeService{
     }
 
     @Override
+    public DiceyEntity getDiceyEntity() {
+        return null;
+    }
+
+    @Override
     public String getServerName() {
         return null;
     }

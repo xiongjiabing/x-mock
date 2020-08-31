@@ -1,6 +1,4 @@
 package org.xiong.xmock.idl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xiong.xmock.api.base.SchemaItem;
 import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
@@ -8,8 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.sql.DriverManager.println;
+
 public class YamlProcessor {
-    static Logger log = LoggerFactory.getLogger(YamlProcessor.class);
 
     public List<SchemaItem> loadYamlOnServer(String fileName) {
         List<SchemaItem> items = new ArrayList<>();
@@ -18,12 +17,12 @@ public class YamlProcessor {
             Yaml yaml = new Yaml();
             in = getResource(fileName);
             if (in == null) {
-                log.warn("[{}] file not found ",fileName);
+                println("["+fileName+"]file not found ");
                 return null;
             }
             Object result = yaml.load(in);
             if (!(result instanceof List)) {
-                log.error("invalid mock file, not a list");
+                println("invalid mock file, not a list");
                 return null;
             }
 
@@ -31,7 +30,7 @@ public class YamlProcessor {
             List l = (List) result;
             for (Object o : l) {
                 if (!(o instanceof Map)) {
-                    log.error("invalid mock file, not a map, line="+o);
+                    println("invalid mock file, not a map, line="+o);
                     continue;
                 }
                 Map m = (Map) o;
@@ -73,7 +72,7 @@ public class YamlProcessor {
             }
             return items;
         } catch (Exception e) {
-            log.error("mock file load exception", e);
+            println("mock file load exception:"+e.getMessage());
         } finally {
             if (in != null) {
                 try {
@@ -89,7 +88,7 @@ public class YamlProcessor {
         InputStream in = null;
         in = getResource(mockFie);
         if (in == null) {
-            log.warn("[{}] file not found ",mockFie);
+            println("["+mockFie+"] file not found ");
             return false;
         }
         return true;
@@ -103,12 +102,12 @@ public class YamlProcessor {
             Yaml yaml = new Yaml();
             in = getResource(fileName);
             if (in == null) {
-                log.warn("[{}] file not found ",fileName);
+                println("["+fileName+"] file not found ");
                 return null;
             }
             Object result = yaml.load(in);
             if (!(result instanceof List)) {
-                log.error("invalid mock file, not a list");
+                println("invalid mock file, not a list");
                 return null;
             }
 
@@ -116,7 +115,7 @@ public class YamlProcessor {
             List l = (List) result;
             for (Object o : l) {
                 if (!(o instanceof Map)) {
-                    log.error("invalid mock file, not a map, line="+o);
+                    println("invalid mock file, not a map, line="+o);
                     continue;
                 }
                 Map m = (Map) o;
@@ -127,7 +126,7 @@ public class YamlProcessor {
                     isReturn = true;
                 }
                 if (s == null) {
-                    log.error("invalid mock file, for not found, line="+o);
+                    println("invalid mock file, not a map, line="+o);
                     continue;
                 }
 
@@ -166,7 +165,7 @@ public class YamlProcessor {
             }
             return items;
         } catch (Exception e) {
-            log.error("mock file load exception", e);
+            println("mock file load exception:"+e.getMessage());
         } finally {
             if (in != null) {
                 try {

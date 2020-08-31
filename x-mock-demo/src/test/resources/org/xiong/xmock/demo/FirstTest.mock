@@ -1,5 +1,5 @@
 - { for-return: org.xiong.xmock.demo.DemoMain.hello,  test: first,  return: {retCode: 0, retMsg: abc, bob: $time, dd: $date, ts: $ts, uuid: $uuid}  }
-- { for-return: org.xiong.xmock.demo.DemoMain.getMgs, test: first,sleep: 4000,  return: 插入这个返回值到mock中,throw: timeout }
+- { for-return: org.xiong.xmock.demo.DemoMain.getMgs, test: first,sleep: 4000,  return: 插入这个返回值到mock中 }
 - { for-return: org.xiong.xmock.demo.DemoMain.getDouble, test: first,  return: 288.0 }
 - { for-return: org.xiong.xmock.demo.DemoMain.getInt(), test: first,  return: 99999999 }
 - { for-return: org.xiong.xmock.demo.DemoMain.getMgsMap, test: first,  return: {first: 1, second: 2} }
@@ -8,6 +8,7 @@
 - { for-return: org.xiong.xmock.demo.FacadeServiceImpl.getServerName, return: xiongjiabing_impl }
 - { for-return: org.xiong.xmock.demo.FacadeServiceImpl.getDemoMain(java.lang.String,java.util.Map), return: {name: xiongjiabing, age: 88 ,hg: 199, dd: 14.4} }
 - { for-return: org.xiong.xmock.demo.FacadeServiceImpl1.getDemoMain(java.lang.String,java.util.Map), return: {name: xiongjiabing, age: 88 ,hg: 199, dd: 14.4} }
+- { for-return: org.xiong.xmock.demo.FacadeServiceImpl.getDiceyEntity, return: {name: first,age: 25,status: SUCCESS} }
 - { for-service: org.xiong.xmock.demo.FacadeServiceImpl=facadeServiceFirst  }
 - { for-service: org.xiong.xmock.demo.FacadeServiceImpl1=facadeServiceFirst1  }
 

@@ -71,7 +71,7 @@ public enum ClassScanner {
 		}
 		for (String pkg : scanBasePackages) {
 			if (pkg != null && pkg.length() != 0)
-				classList.addAll(ClassScanner.scanOnePackage(pkg,false));
+				classList.addAll(ClassScanner.scanOnePackage(pkg,true));
 		}
 		return classList;
 	}

@@ -13,7 +13,7 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 ##设计原则
 * Micro kernel+plug-in
     *   x-mock-core为核心，不做具体业务操作。仅仅对各个插件进行调度管理、生命周期的编排工作。实际业务操作由各插件实现。
-        每个插件都是独立存在,可以灵活做到加载、替换。
+        每个插件都是独立存在,可以灵活做到加载、替换。(xmock.load.exclude 指定不被加载的插件。多个,隔开)
 
     *  x-mock当前具有4个扩展点（CodeCoverage,Describable,Engine,IOCcontainer），用户可以通过扩展点编写自己的插件。
        插件实现原则：
@@ -67,10 +67,8 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 * @AutoInject 作用域在test类属性
 
 
-###关于spring的集成
-* 当springboot已经成为主流,x-mock在设计之初并没有考虑对原生spring直接支持。与spring的生态体系结合仅仅建立在springboot之上。
-* x-mock内置x-mock-spring插件。默认会启动，可以做到动态加载与替换。具体扩展详见`设计原则`部分
-* yaml mock文件编写将变得更加简洁。只需要for-return到具体类型,x-mock会自动注入到指定类型，完全兼容@Autowired、@Qualifier
+###关于spring的支持
+* yaml mock文件编写将变得更加简洁。只需要for-return到具体类型,x-mock会自动注入到指定类型，完全兼容@Autowired、@Qualifier等spring常规注解。
 同时支持jdk内置@Resource注解
 
 ###关于jacoco的集成

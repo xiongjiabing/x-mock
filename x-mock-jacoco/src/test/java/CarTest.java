@@ -5,8 +5,8 @@ public class CarTest {
 
     @Test
     public void carShow() throws Exception {
-        XInstrument vv = new XInstrument();
-        vv.execute();
+//        XInstrument vv = new XInstrument();
+//        vv.execute();
 
        // AgentOptions
 //        XmockExecDump xmockExecDump = new XmockExecDump();

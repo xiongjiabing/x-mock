@@ -5,6 +5,7 @@ import org.codehaus.jackson.type.JavaType;
 import org.xiong.xmock.api.base.SchemaItem;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -44,7 +45,8 @@ public class EngineProcessor {
 
                 Type type = method.getGenericReturnType();
                 String json = builtinFunction( mapper.writeValueAsString( schemaItem.getRes()) );
-                JavaType javaType = ReflectionUtils.getJavaType( type );
+                JavaType javaType = ReflectionUtils.getJavaType( type  );
+
                 result = mapper.readValue( json, javaType );
             }
         }

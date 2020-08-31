@@ -15,4 +15,6 @@ public interface FacadeService {
 
     DemoItem getDemoMain(String arg,Map<String,List<DemoItem>> map);
 
+    DiceyEntity<String> getDiceyEntity();
+
 }

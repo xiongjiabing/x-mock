@@ -62,6 +62,8 @@ public class Transformer implements ClassFileTransformer {
     boolean preCheck( String className ){
         if( TestCaseMetadata.ac.get()
                 || className == null
+                || className.contains("$")
+                || className.contains("BadPaddingException")
                 || className.contains("com/intellij/rt")
                 || className.contains("com/sun/proxy")
                 || className.contains("sun/reflect")){

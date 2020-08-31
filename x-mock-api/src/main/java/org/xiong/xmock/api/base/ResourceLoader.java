@@ -7,6 +7,14 @@ import java.util.Properties;
 
 public class ResourceLoader {
 
+    private static Properties properties;
+
+    public static Properties getSystemProperties(){
+        if( properties == null )
+              properties = loadResource("/bootstrap.properties");
+        return properties;
+    }
+
     public static Properties loadResource( String resource ) {
         Properties result = new Properties();
         InputStream file = Thread.currentThread().getContextClassLoader().getResourceAsStream( resource );

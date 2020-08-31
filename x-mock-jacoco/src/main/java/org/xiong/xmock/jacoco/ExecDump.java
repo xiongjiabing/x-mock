@@ -6,15 +6,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import org.jacoco.core.tools.ExecDumpClient;
 import org.jacoco.core.tools.ExecFileLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * jacoco.exec file client端
  */
 public class ExecDump {
 
-	static Logger log = LoggerFactory.getLogger(ExecDump.class);
+	//static Logger log = LoggerFactory.getLogger(ExecDump.class);
 
 	/**
 	 * Path to the output file for execution data.
@@ -68,13 +66,13 @@ public class ExecDump {
 			@Override
 			protected void onConnecting(final InetAddress address,
 					final int port) {
-				log.info(format("Connecting to %s:%s", address,
-						Integer.valueOf(port)));
+//				log.info(format("Connecting to %s:%s", address,
+//						Integer.valueOf(port)));
 			}
 
 			@Override
 			protected void onConnectionFailure(final IOException exception) {
-				log.info(exception.getMessage());
+				//log.info(exception.getMessage());
 			}
 		};
 		client.setDump(dump);
@@ -84,8 +82,8 @@ public class ExecDump {
 		try {
 			final ExecFileLoader loader = client.dump(address, port);
 			if (dump) {
-				log.info(format("Dumping execution data to %s",
-						destFile.getAbsolutePath()));
+//				log.info(format("Dumping execution data to %s",
+//						destFile.getAbsolutePath()));
 				loader.save(destFile, append);
 			}
 		} catch (final Exception e) {

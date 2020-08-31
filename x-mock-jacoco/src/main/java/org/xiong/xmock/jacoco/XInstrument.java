@@ -1,8 +1,6 @@
 package org.xiong.xmock.jacoco;
-
 import java.io.*;
 import java.util.*;
-
 import com.sun.tools.javac.Main;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.FileUtils;
@@ -10,12 +8,12 @@ import org.codehaus.plexus.util.IOUtil;
 import org.jacoco.agent.rt.internal_43f5073.ResourceLoader;
 import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.OfflineInstrumentationAccessGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static java.sql.DriverManager.println;
+
 
 @Instrument
 public class XInstrument {
-    static Logger log = LoggerFactory.getLogger(XInstrument.class);
     final String sourceBasePath = "src/main/java/";
 
     public void execute()
@@ -34,9 +32,7 @@ public class XInstrument {
 
         final File classesDir = new File("target/classes");
         if (!classesDir.exists()) {
-            log.info(
-                    "missing target.classes directory:"
-                            ,classesDir);
+            println( "missing target.classes directory:"+classesDir);
             return;
         }
         //org/xiong/xmock/jacoco/learn/Car.class
@@ -49,6 +45,7 @@ public class XInstrument {
             for (int i = 0; i < excludeArr.length; i++) {
                 excludes.add(excludeArr[i]);
             }
+
             fileNames = new FileFilter( null, excludes )
                     .getFileNames(classesDir);
         } catch (final IOException e1) {
@@ -58,9 +55,7 @@ public class XInstrument {
 
         final File sourceDir = new File("src/main/java");
         if (!sourceDir.exists()) {
-            log.info(
-                    "missing src.main.java directory:"
-                    ,sourceDir);
+            println("missing src.main.java directory:"+sourceDir);
             return;
         }
 
@@ -134,7 +129,7 @@ public class XInstrument {
             oos = new ObjectOutputStream(new FileOutputStream("target/x-mock/template"));
             oos.writeObject(fileInfo);
         }catch (IOException e){
-            log.error("create x-mock file error ",e);
+            println("create x-mock file error "+e.getMessage());
         }finally {
             oos.close();
         }
@@ -153,7 +148,7 @@ public class XInstrument {
         }).forEach( name->{
             int c = Main.compile(new String[]{ sourceBasePath+name , "-d", "target/classes"});
             if( c != 0 ){
-                log.error("编译失败,编译码: ",c);
+                println("编译失败,编译码:"+c);
                 throw new RuntimeException(
                         "编译失败,编译码: "+c);
             }

@@ -5,8 +5,6 @@ import java.util.Map;
 
 public class FacadeServiceImpl implements FacadeService{
 
-
-
     public DemoItem getDemoMain(String arg,Map<String,List<DemoItem>> map) {
         return null;
     }
@@ -30,4 +28,10 @@ public class FacadeServiceImpl implements FacadeService{
     public List<Map<String, DemoItem>> getMapping() {
         return null;
     }
+
+    @Override
+    public DiceyEntity getDiceyEntity() {
+        return null;
+    }
+
 }

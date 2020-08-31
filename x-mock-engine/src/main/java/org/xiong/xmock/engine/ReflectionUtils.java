@@ -2,8 +2,8 @@ package org.xiong.xmock.engine;
 import lombok.SneakyThrows;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -12,7 +12,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ReflectionUtils {
 
-    static Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
     static Class<?>[] dummyTypes = new Class<?>[0];
     static Object[] dummyParameters = new Object[0];
     static Class<?>[] callableTypes = new Class<?>[]{String.class};
@@ -23,7 +22,6 @@ public class ReflectionUtils {
         try {
             return Class.forName(s);
         } catch (Throwable e) {
-            log.error("load mockClass:[{}] error",s,e);
             throw e;
         }
     }
@@ -53,7 +51,7 @@ public class ReflectionUtils {
             Method method = obj.getClass().getDeclaredMethod(methodName, dummyTypes);
             return method.invoke(obj, dummyParameters);
         } catch (Exception e) {
-            log.error("invokeMethod exception, e=" + e.getMessage());
+            System.err.println("invokeMethod exception, e="+e.getMessage());
             return null;
         }
     }
@@ -153,7 +151,7 @@ public class ReflectionUtils {
         return 0;
     }
 
-    public static JavaType getJavaType(Type type) {
+    public static JavaType getJavaType(Type type ) {
 
         if ( type instanceof ParameterizedType ) {
             Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
@@ -164,13 +162,13 @@ public class ReflectionUtils {
 
             for (int i = 0; i < actualTypeArguments.length; i++) {
                 //泛型也可能带有泛型，递归获取
-                javaTypes[i] = getJavaType(actualTypeArguments[i]);
+                javaTypes[i] = getJavaType( actualTypeArguments[i] );
             }
             return TypeFactory.defaultInstance().constructParametricType(rowClass, javaTypes);
         } else {
 
             Class cla = (Class) type;
-            return TypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0]);
+            return TypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0] );
         }
     }
 
@@ -263,8 +261,9 @@ public class ReflectionUtils {
         for ( Field f : fields ) {
 
             String targetServiceName = null ;
+            String serviceAliasName = getTargetServiceAliasName(f);
             if( serviceName.size() > 0 ) {
-                String serviceAliasName = getTargetServiceAliasName(f);
+
                 if (isBlank(serviceAliasName)) {
                     targetServiceName = serviceName.get(f.getName());
                 } else {
@@ -272,14 +271,13 @@ public class ReflectionUtils {
                 }
             }
 
-            if( !isBlank( targetServiceName )
-                   || !assignment(f, proxyType, sourceInstance, proxyValue , fieldAnno) ){
-
+            if( !isBlank( serviceAliasName )
+                    || !isBlank( targetServiceName )
+                    || !assignment(f, proxyType, sourceInstance, proxyValue , fieldAnno)){
                 injectByType( proxyType ,getFieldValue(f, sourceInstance) ,proxyValue,serviceName, fieldAnno );
             }
         }
     }
-
 
     public static void scanByAnnoAndInject(
             Class<? extends Annotation> typeAnno
@@ -332,6 +330,10 @@ public class ReflectionUtils {
                 Resource resource = (Resource)anno;
                 return resource.name();
             }
+            if( anno.annotationType().getName().equals("org.springframework.beans.factory.annotation.Qualifier") ){
+                Qualifier qualifier = (Qualifier)anno;
+                return qualifier.value();
+            }
         }
         return null;
     }
@@ -371,7 +373,7 @@ public class ReflectionUtils {
             Object value = field.get( o );
             return value;
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            System.err.println(e.getMessage());
             return null;
         }
     }

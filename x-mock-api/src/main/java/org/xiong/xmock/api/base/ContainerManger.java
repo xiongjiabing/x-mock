@@ -1,21 +1,39 @@
 package org.xiong.xmock.api.base;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
+
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import static java.sql.DriverManager.println;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public final class ContainerManger {
-    static Logger log = LoggerFactory.getLogger(ContainerManger.class);
-
+    private static volatile java.io.PrintWriter logWriter = null;
     public static final ArrayList<Class<?>> SPI_INF = new ArrayList<Class<?>>();
 
     static {
+
+        List<String> excludeLoads = null;
+        Properties properties = ResourceLoader.getSystemProperties();
+        if( properties != null ){
+            String xmockLoad = (String)properties.get("xmock.load.exclude");
+            if( !isBlank(xmockLoad) ) {
+                String [] xlods = xmockLoad.split(",");
+                excludeLoads = Arrays.asList( xlods );
+            }
+        }
+
         List<Class> classList = ClassScanner.scanByAnno( Xspi.class,"org.xiong.xmock.api" );
         if( classList != null ){
-            classList = classList.stream().sorted(Comparator.comparing( cls->{
+            List<String> finalLoads = excludeLoads;
+            classList = classList.stream()
+                .filter(cls->{
+                    Xspi xspi = (Xspi)cls.getAnnotation(Xspi.class);
+                    return finalLoads == null || !finalLoads.contains(xspi.name());
+                })
+               .sorted(Comparator.comparing( cls->{
                 Xspi xspi = (Xspi)cls.getAnnotation(Xspi.class);
                 return xspi.value();
             })).collect(Collectors.toList());
@@ -62,7 +80,7 @@ public final class ContainerManger {
                     continue;
 
                 container.start();
-                log.info("[{}] spi service started ",container.getClass());
+                println("["+container.getClass()+"] spi service started ");
             }
         }catch (Exception e){
             throw new Exception("the container start error ",e);
@@ -97,7 +115,7 @@ public final class ContainerManger {
                 containersIterator.next();
             }
         } catch(Throwable t) {
-            log.error("load spi error",t);
+            println("load spi error :"+t.getMessage());
             // Do nothing
         }
 
@@ -125,7 +143,7 @@ public final class ContainerManger {
         String cn = firstMapping.getValue();
         Class<?> c = null;
         try {
-            log.info("Initializing spi service [{}]",firstMapping.getName() );
+            println("Initializing spi service ["+firstMapping.getName()+"]");
             c = Class.forName(cn, true, xspiLoader.getLoader());
         } catch (ClassNotFoundException x) {
             fail(service,
@@ -211,6 +229,5 @@ public final class ContainerManger {
     {
         fail(service, u + ":" + line + ": " + msg);
     }
-
 
 }

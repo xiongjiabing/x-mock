@@ -17,6 +17,7 @@ public class PremainArgWrapper {
     private String agentArgs;
     private Instrumentation inst;
 
+
     public boolean isServer(){
         try {
             if( !isBlank( agentArgs) ) {
@@ -25,7 +26,7 @@ public class PremainArgWrapper {
                     return true;
                 }
             }
-            Properties config = ResourceLoader.loadResource("/bootstrap.properties");
+            Properties config = ResourceLoader.getSystemProperties();
             Object obj;
             if ((obj = config.get("xmock.model")) != null ){
                 if( "server".equals(obj.toString()) ){
