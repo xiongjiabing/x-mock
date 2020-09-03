@@ -29,7 +29,7 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
 ##使用指南
 
 ###模式
-* x-mock主要有2种模式:server、client(默认client)
+* x-mock主要有2种模式:server、client(默认client),当选择server模式时,建议关闭x-mock-jacoco插件
 * 可以在项目的资源文件bootstrap.properties 添加 xmock.model=server
 * 或者加在vm参数中-javaagent:/Users/target/x-mock.jar=xmock.model=server
 
@@ -63,8 +63,8 @@ x-mock最大的不同就是通过配置的方式进行mock。录制配置脚本�
    *  $uuid 唯一id
    
 ###内置注解支持
-* @XMock 作用域在test类
-* @AutoInject 作用域在test类属性
+* @XMock 作用域类
+* @AutoInject 作用域类属性
 
 
 ###关于spring的支持

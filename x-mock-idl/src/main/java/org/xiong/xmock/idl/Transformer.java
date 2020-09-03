@@ -11,12 +11,21 @@ import java.util.List;
 public class Transformer implements ClassFileTransformer {
     private final YamlProcessor yamlProcessor = new YamlProcessor();
     private ClassPool pool;
+    private boolean isServer;
 
     public Transformer(){
-        if (pool == null) {
-            pool = new ClassPool(true);
-            pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+        if ( pool == null ) {
+             pool = new ClassPool(true);
+             pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
         }
+    }
+
+    public Transformer( boolean isServer ){
+        if ( pool == null ) {
+             pool = new ClassPool(true);
+             pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+        }
+        this.isServer = isServer;
     }
 
     @Override
@@ -26,32 +35,37 @@ public class Transformer implements ClassFileTransformer {
             return classfileBuffer;
         }
         try {
-
                String classFile = className.replace('/', '.');
                CtClass ctClass = pool.get(classFile);
                CtMethod[] methods = ctClass.getDeclaredMethods();
-               if( className.endsWith("Test")){
-                   String yamlFile = className+".mock";
 
-                   for ( CtMethod m : methods ){
-                       if ( m.hasAnnotation("org.junit.Test")){
-                           m.insertBefore("{ new org.xiong.xmock.engine.Xmock().doMock($0,\""+classFile+"\",\""+m.getName()+"\"); }");
+               if( isServer ){
+
+                   if( ctClass.hasAnnotation("org.springframework.web.bind.annotation.RestController")){
+                       for ( CtMethod m : methods ){
+                           if ( m.hasAnnotation("java.lang.Override")
+                                   || m.hasAnnotation("org.springframework.web.bind.annotation.PostMapping")
+                                   || m.hasAnnotation("org.springframework.web.bind.annotation.GetMapping")){
+                               m.insertBefore("{ new org.xiong.xmock.engine.Xmock().doMock($0,\"appserver.mock\",null); }");
+                               return ctClass.toBytecode();
+                           }
                        }
                    }
-                   List<SchemaItem> list = yamlProcessor.loadYamlOnServer( yamlFile );
-                   SchemaItemManager.addTestClassMapping( classFile ,list );
-                   return ctClass.toBytecode();
-               }
-//                if( ctClass.hasAnnotation("org.xiong.xmock.engine.annotation.XMock")
-//                        || ctClass.hasAnnotation("org.springframework.boot.autoconfigure.SpringBootApplication")){
-//                    for ( CtMethod m : methods ){
-//                        if ( m.getName().equals("main")){
-//                            m.insertBefore("{ new org.xiong.xmock.engine.Xmock().doMock(new java.lang.Object(),\"appserver.mock\",null); }");
-//                            return ctClass.toBytecode();
-//                        }
-//                    }
-//                }
+               } else {
 
+                   if( className.endsWith("Test")
+                           || ctClass.hasAnnotation("org.junit.runner.RunWith") ){
+                       for ( CtMethod m : methods ){
+                           if ( m.hasAnnotation("org.junit.Test")){
+                               m.insertBefore("{ new org.xiong.xmock.engine.Xmock().doMock($0,\""+classFile+"\",\""+m.getName()+"\"); }");
+                           }
+                       }
+                       String yamlFile = className+".mock";
+                       List<SchemaItem> list = yamlProcessor.loadYamlOnServer( yamlFile );
+                       SchemaItemManager.addTestClassMapping( classFile ,list );
+                       return ctClass.toBytecode();
+                   }
+               }
        }catch (Exception e ){
             System.out.println(className);
            e.printStackTrace();
@@ -60,7 +74,7 @@ public class Transformer implements ClassFileTransformer {
     }
 
     boolean preCheck( String className ){
-        if( TestCaseMetadata.ac.get()
+        if( TestCaseMetadata.getAgentInitialized()
                 || className == null
                 || className.contains("$")
                 || className.contains("BadPaddingException")

@@ -37,7 +37,7 @@ public class SourceHandleChain implements ISourceHandleChain{
               return;
            }
            ISourceHandle sourceHandle = sourceHandleList.get( index++ );
-           sourceHandle.handle(accept,this);
+           sourceHandle.handle( accept,this);
        }
     }
 

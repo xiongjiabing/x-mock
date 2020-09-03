@@ -2,18 +2,39 @@ package org.xiong.xmock.engine;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.JavaType;
+import org.xiong.xmock.api.base.LocalLock;
 import org.xiong.xmock.api.base.SchemaItem;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.net.SocketTimeoutException;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class EngineProcessor {
 
-    public static Object processorMethodRes( SchemaItem schemaItem , Method method ) throws Throwable{
+    private static Set<String > testClassCache = new HashSet<>();
+
+    public static boolean mockHasComplete( Object obj ){
+        if( testClassCache.contains( obj.getClass().getName() ) ){
+            return true;
+        }
+        LocalLock.lock(obj.getClass().getName());
+
+        if( testClassCache.contains( obj.getClass().getName() ) ){
+            return true;
+        }
+        return false;
+    }
+
+    public static void mockComplete( Object obj ){
+
+        testClassCache.add( obj.getClass().getName() );
+        LocalLock.unlock( obj.getClass().getName() );
+
+    }
+
+    public static Object processorMethod( SchemaItem schemaItem , Method method ) throws Throwable{
         Object result = null;
         ObjectMapper mapper = new ObjectMapper();
         if( schemaItem != null ){

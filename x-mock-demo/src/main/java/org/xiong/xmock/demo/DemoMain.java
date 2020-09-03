@@ -34,6 +34,15 @@ public class DemoMain {
       return "第二个字节码修改。。。";
     }
 
+    public String wrapPrivateMgs(){
+        return getPrivateMgs();
+    }
+
+    private String getPrivateMgs(){
+      //  System.out.println("执行私有方法");
+        return null;
+    }
+
     public Double getDouble(){
         return 0d;
     }

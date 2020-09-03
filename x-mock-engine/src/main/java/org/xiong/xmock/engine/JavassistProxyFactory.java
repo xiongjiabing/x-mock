@@ -27,7 +27,7 @@ public class JavassistProxyFactory {
                      return;
                  }
              });
-             return EngineProcessor.processorMethodRes( schemaItemReference.get(),overridden );
+             return EngineProcessor.processorMethod( schemaItemReference.get(),overridden );
          }
      };
     }

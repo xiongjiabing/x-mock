@@ -9,9 +9,10 @@ import java.util.List;
 public class IdlMain implements Describable {
 
     @Override
-    public void start( String fileName ) {
+    public void start( Instrumentation inst,String fileName ) {
         List<SchemaItem> list = new YamlProcessor().loadYamlOnServer( fileName );
         SchemaItemManager.addTestClassMapping( fileName,list );
+        inst.addTransformer( new ServerTransformer() );
     }
 
     @Override
@@ -21,7 +22,7 @@ public class IdlMain implements Describable {
 
     @Override
     public void start( Instrumentation inst ) {
-        inst.addTransformer(new Transformer());
+        inst.addTransformer( new ClientTransformer() );
     }
 
     @Override

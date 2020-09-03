@@ -1,11 +1,9 @@
 package org.xiong.xmock.api.base;
-import org.apache.commons.lang3.StringUtils;
-
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.concurrent.ConcurrentHashMap;
 import static java.sql.DriverManager.println;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -18,10 +16,12 @@ public final class ContainerManger {
         List<String> excludeLoads = null;
         Properties properties = ResourceLoader.getSystemProperties();
         if( properties != null ){
+
             String xmockLoad = (String)properties.get("xmock.load.exclude");
             if( !isBlank(xmockLoad) ) {
                 String [] xlods = xmockLoad.split(",");
                 excludeLoads = Arrays.asList( xlods );
+
             }
         }
 

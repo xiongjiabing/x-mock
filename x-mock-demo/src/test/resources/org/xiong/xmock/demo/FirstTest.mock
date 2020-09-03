@@ -1,5 +1,6 @@
 - { for-return: org.xiong.xmock.demo.DemoMain.hello,  test: first,  return: {retCode: 0, retMsg: abc, bob: $time, dd: $date, ts: $ts, uuid: $uuid}  }
 - { for-return: org.xiong.xmock.demo.DemoMain.getMgs, test: first,sleep: 4000,  return: 插入这个返回值到mock中 }
+- { for-return: org.xiong.xmock.demo.DemoMain.getPrivateMgs, test: first, return: private_method_mock_successful }
 - { for-return: org.xiong.xmock.demo.DemoMain.getDouble, test: first,  return: 288.0 }
 - { for-return: org.xiong.xmock.demo.DemoMain.getInt(), test: first,  return: 99999999 }
 - { for-return: org.xiong.xmock.demo.DemoMain.getMgsMap, test: first,  return: {first: 1, second: 2} }

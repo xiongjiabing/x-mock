@@ -9,11 +9,11 @@ import java.util.List;
 @Xspi(value = 100,name = "describable")
 public interface Describable extends Container {
 
-    public void start( String fileName );
+    public void start( Instrumentation inst );
 
     public void start( String fileName,String testCase );
 
-    public void start( Instrumentation inst );
+    public void start( Instrumentation inst,String fileName );
 
     public List<SchemaItem> items();
 

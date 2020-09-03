@@ -2,61 +2,67 @@ package org.xiong.xmock.engine;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.xiong.xmock.api.base.*;
 import java.lang.reflect.Method;
 import lombok.SneakyThrows;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class Xmock {
 
     public void doMock( Object source,String testClassName, String testScope ){
-        TestCaseMetadata.ac.compareAndSet(false,true );
+        TestCaseMetadata.agentInitComplete();
+        try{
+            if ( EngineProcessor.mockHasComplete( source )){
+                return;
+            }
+            Map<String,String> serviceName = SchemaItemManager.getServiceName( testClassName );
+            SchemaItemManager.obtainActualSchemaItem( testClassName, testScope )
+                    .forEach(( targetMockClassName ,methodMapping )->{
 
-        Map<String,String> serviceName = SchemaItemManager.getServiceName( testClassName );
-        SchemaItemManager.obtainActualSchemaItem(testClassName, testScope)
-                .forEach((targetMockClassName ,methodMappin )->{
+                        Object mockInstance;
+                        Class clazz = ReflectionUtils.getClass( targetMockClassName );
+                        if( clazz.isInterface() ){
+                            //if interface, by manual generate proxy object
+                            mockInstance = JavassistProxyFactory.getProxy( clazz , JavassistProxyFactory.getHandler( methodMapping ));
 
-                    Object mockInstance;
-                    Class clazz = ReflectionUtils.getClass( targetMockClassName );
-                    if( clazz.isInterface() ){
-                        //if interface, by manual generate proxy object
-                        mockInstance = JavassistProxyFactory.getProxy( clazz , JavassistProxyFactory.getHandler( methodMappin ));
+                        } else {
+                            // if ordinary Class,by high-level api generate proxy object
+                            mockInstance = mock( clazz );
 
-                    } else {
-                        // if ordinary Class,by high-level api generate proxy object
-                        mockInstance = mock( clazz );
+                            Service serviceAnno =  (Service)clazz.getDeclaredAnnotation( Service.class );
+                            String service = null;
+                            if( serviceAnno != null ){
+                                service = serviceAnno.value();
+                                if( isBlank(service) ){
+                                    targetMockClassName = targetMockClassName.substring(targetMockClassName.lastIndexOf(".")+1);
 
-                        Service serviceAnno =  (Service)clazz.getDeclaredAnnotation( Service.class );
-                        String service = null;
-                        if( serviceAnno != null ){
-                            service = serviceAnno.value();
-                            if( isBlank(service) ){
-                                targetMockClassName = targetMockClassName.substring(targetMockClassName.lastIndexOf(".")+1);
-
-                                service = left(targetMockClassName, 1).toLowerCase()
-                                        +right(targetMockClassName,targetMockClassName.length() - 1);
+                                    service = left(targetMockClassName, 1).toLowerCase()
+                                            +right(targetMockClassName,targetMockClassName.length() - 1);
+                                }
                             }
+
+                            if ( !isBlank( service)
+                                    && !serviceName.containsKey(service ) ){
+
+                                serviceName.put( service, clazz.getName() );
+                            }
+                            new Binder( mockInstance,methodMapping ).bindReturnHandler();
                         }
 
-                        if ( !isBlank( service)
-                                && !serviceName.containsKey(service ) ){
-
-                            serviceName.put( service, clazz.getName() );
-                        }
-                        new Binder( mockInstance,methodMappin).bindReturnHandler();
-
-                    }
-                    //by x-mock framework inject
-                    ReflectionUtils.inject( clazz,source,mockInstance,serviceName
-                            ,"org.xiong.xmock.engine.annotation.AutoInject"
-                            ,"javax.annotation.Resource"
-                            ,"org.springframework.beans.factory.annotation.Autowired" );
-        });
+                        //by x-mock framework inject
+                        ReflectionUtils.inject( clazz,source,mockInstance,serviceName
+                                ,"org.xiong.xmock.engine.annotation.AutoInject"
+                                ,"javax.annotation.Resource"
+                                ,"org.springframework.beans.factory.annotation.Autowired" );
+                    });
+        } catch ( Exception e ){
+            throw e;
+        } finally {
+            EngineProcessor.mockComplete( source );
+        }
     }
 
     @SneakyThrows
@@ -97,7 +103,8 @@ public class Xmock {
                             return;
                         }
                     });
-                    Object result = EngineProcessor.processorMethodRes(schemaItemReference.get(),overridden );
+                    Object result = EngineProcessor.processorMethod(schemaItemReference.get(),overridden );
+                    ((ProxyObject) mock).setHandler( this );
                     return result == null ? proceed.invoke( mock, args ) : result;
                 }
             };
