@@ -7,7 +7,6 @@ import java.util.Map;
 
 @XMock
 public class FirstTest {
-//-javaagent:/Users/user/Documents/binance_workspace/x-mock/x-mock-core/target/k-mock-core-1.0-SNAPSHOT.jar
 
     @AutoInject
     DemoMain demoMain;
@@ -36,7 +35,6 @@ public class FirstTest {
         System.out.println( facadeServiceFirst.getServerName());
         DiceyEntity diceyEntity = facadeServiceFirst.getDiceyEntity();
         System.out.println( diceyEntity.getAge()+"==="+diceyEntity.getName()+"==="+diceyEntity.getStatus().name() );
-
 
     }
 
