@@ -104,7 +104,6 @@ public class Xmock {
                         }
                     });
                     Object result = EngineProcessor.processorMethod(schemaItemReference.get(),overridden );
-                    ((ProxyObject) mock).setHandler( this );
                     return result == null ? proceed.invoke( mock, args ) : result;
                 }
             };

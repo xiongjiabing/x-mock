@@ -1,5 +1,4 @@
 package org.xiong.xmock.idl;
-
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -35,7 +34,9 @@ public class TransformerBase implements ClassFileTransformer {
 
     @Override
     public byte[] transform( ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-        preCheck( className );
+        if( preCheck( className )){
+            return classfileBuffer;
+        }
         try{
             String classFile = className.replace('/', '.');
             CtClass ctClass = pool.get(classFile);
