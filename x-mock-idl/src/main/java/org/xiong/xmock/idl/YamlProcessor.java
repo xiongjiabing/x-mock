@@ -45,6 +45,9 @@ public class YamlProcessor {
                 s = m.get("test");
                 String test = s != null ? s.toString() : "";
 
+                s = m.get("type");
+                String type = s != null ? s.toString() : "";
+
                 s = m.get("for-service");
                 String service = s != null ? s.toString() : "";
 
@@ -62,6 +65,7 @@ public class YamlProcessor {
                 SchemaItem i = new SchemaItem();
                 i.setReturn( isReturn );
                 i.setForName(forName);
+                i.setType(type);
                 i.setService(service);
                 i.setSleep( sleep );
                 i.setThrowError( throwError );
@@ -143,6 +147,9 @@ public class YamlProcessor {
                 s = m.get("for-service");
                 String service = s != null ? s.toString() : "";
 
+                s = m.get("type");
+                String type = s != null ? s.toString() : "";
+
                 s = m.get("sleep");
                 String sleep = s != null ? s.toString() : null;
 
@@ -156,6 +163,7 @@ public class YamlProcessor {
                 i.setReturn( isReturn );
                 i.setService( service );
                 i.setForName( forName );
+                i.setType(type);
                 i.setSleep( sleep );
                 i.setThrowError( throwError );
                 i.setTestScope(test);

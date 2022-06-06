@@ -1,2 +1,0 @@
-org.springframework.boot.SpringApplicationRunListener=\
-com.binance.fiat.service.web.service.ocbs.validators.ValidateListener

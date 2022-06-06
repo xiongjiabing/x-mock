@@ -2,8 +2,6 @@ package org.xiong.xmock.jacoco;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.apache.commons.lang3.StringUtils;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
@@ -41,7 +39,7 @@ public class ReportGenerator {
 	 */
 	public ReportGenerator() {
 		this.title = "project";
-		this.executionDataFile = new File( rootName,"jacoco.exec");//第一步生成的exec的文件
+		this.executionDataFile = new File( "jacoco.exec");//第一步生成的exec的文件
 		//this.classesDirectory = new File(rootName, "classes");//目录下必须包含源码编译过的class文件,用来统计覆盖率。所以这里用server打出的jar包地址即可,运行的jar或者Class目录
 		this.classesDirectory = new File(rootName, "generated-classes/jacoco");//目录下必须包含源码编译过的class文件,用来统计覆盖率。所以这里用server打出的jar包地址即可,运行的jar或者Class目录
 		this.sourceDirectory = new File( "src/main/java");//源码目录

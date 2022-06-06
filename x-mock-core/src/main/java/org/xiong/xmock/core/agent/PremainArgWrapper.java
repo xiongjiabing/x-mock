@@ -39,4 +39,20 @@ public class PremainArgWrapper {
         }
         return false;
     }
+
+    public boolean isOpen(){
+        try {
+            Properties config = ResourceLoader.getSystemProperties();
+            Object obj;
+            if ((obj = config.get("xmock.model")) != null ){
+                if( "close".equals(obj.toString()) ){
+                    return false;
+                }
+            }
+
+        }catch (Exception e){
+            throw e;
+        }
+        return true;
+    }
 }

@@ -103,11 +103,20 @@ public class XInstrument {
 //                        //报表生成过, 需要手工编译，否则会和jacoco植入的class引起冲突
 //                        instrumentPre( sourceFileNames, fileName );
 //                    }
+
                     FileUtils.copyFile( source, backup );
+                    if(!source.exists() ){
+                        System.out.println(source.getPath());
+                        System.out.println("source 文件不存在");
+                    }
+                    if(!backup.exists()){
+                        System.out.println(backup.getPath());
+                        System.out.println("backup 文件不存在");
+                    }
+
                     input = new FileInputStream(backup);
                     output = new FileOutputStream(source);
                     instrumenter.instrument(input, output, source.getPath());
-
                     map.put( fileName ,source.lastModified()+"");
                 } catch (final Exception e2) {
                     throw new Exception(
@@ -154,4 +163,5 @@ public class XInstrument {
             }
         });
     }
+
 }

@@ -9,6 +9,25 @@ public class AgentProcessor {
     }
 
     public void premainProcessor(){
-        CoreMain.preStart( premainArgWrapper );
+        try {
+            CoreMain.preStart( this.premainArgWrapper );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+    public AgentProcessor(){
+
+    }
+
+    public void premainProcessor(PremainArgWrapper premainArgWrapper){
+        try {
+            if(premainArgWrapper.isOpen()) {
+                CoreMain.preStart(premainArgWrapper);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

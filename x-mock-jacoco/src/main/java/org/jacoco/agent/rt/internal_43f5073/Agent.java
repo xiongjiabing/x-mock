@@ -97,7 +97,7 @@ public class Agent implements IAgent {
             }
 
             //报表分析
-            new ReportGenerator().create();
+         //   new ReportGenerator().create();
         } catch (Exception var2) {
             this.logger.logExeption(var2);
         }

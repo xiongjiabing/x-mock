@@ -1,9 +1,12 @@
 package org.xiong.xmock.engine;
+
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.JavaType;
 import org.xiong.xmock.api.base.LocalLock;
 import org.xiong.xmock.api.base.SchemaItem;
+import org.xiong.xmock.api.base.TestCaseMetadata;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.SocketTimeoutException;
@@ -13,6 +16,7 @@ import java.util.*;
 
 public class EngineProcessor {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
     private static Set<String > testClassCache = new HashSet<>();
 
     public static boolean mockHasComplete( Object obj ){
@@ -36,7 +40,7 @@ public class EngineProcessor {
 
     public static Object processorMethod( SchemaItem schemaItem , Method method ) throws Throwable{
         Object result = null;
-        ObjectMapper mapper = new ObjectMapper();
+
         if( schemaItem != null ){
 
             String throwError = schemaItem.getThrowError();
@@ -60,18 +64,33 @@ public class EngineProcessor {
                 if( returnClassType.getTypeName().equals("void") ){
                     return result;
                 }
-                if( returnClassType.isPrimitive() || ReflectionUtils.isWrap( returnClassType)){
+
+                if( !returnClassType.getName().equals(Object.class.getName())
+                        && (returnClassType.isPrimitive() || ReflectionUtils.isWrap( returnClassType))){
                     return  ReflectionUtils.getBaseTypeValue( returnClassType ,result );
                 }
-
                 Type type = method.getGenericReturnType();
-                String json = builtinFunction( mapper.writeValueAsString( schemaItem.getRes()) );
-                JavaType javaType = ReflectionUtils.getJavaType( type  );
+                if(!StringUtils.isBlank(schemaItem.getType())){
+                    type = ReflectionUtils.getClass(schemaItem.getType());
+                }
 
+                JavaType javaType = invokeJavaType( type  );
+                String json = builtinFunction( mapper.writeValueAsString( schemaItem.getRes()) );
+                //JavaType javaType = ReflectionUtils.getJavaType( type  );
                 result = mapper.readValue( json, javaType );
             }
         }
         return result;
+    }
+
+
+
+    @SneakyThrows
+    public static JavaType invokeJavaType(Type type){
+        Class startupClass = TestCaseMetadata.xmockClassLoader.loadClass("org.xiong.xmock.engine.ReflectionUtils");
+        Method method = startupClass.getMethod("getJavaType",Type.class);
+        JavaType javaType = (JavaType)method.invoke(null,type);
+        return javaType;
     }
 
 

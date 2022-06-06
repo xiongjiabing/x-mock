@@ -9,7 +9,7 @@ public class ResourceLoader {
 
     public static Properties getSystemProperties(){
         if( properties == null )
-              properties = loadResource("/bootstrap.properties");
+              properties = loadResource("bootstrap.properties");
         return properties;
     }
 

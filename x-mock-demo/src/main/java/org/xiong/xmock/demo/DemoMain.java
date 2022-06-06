@@ -1,7 +1,9 @@
 package org.xiong.xmock.demo;
 
+import lombok.SneakyThrows;
 import org.xiong.xmock.engine.annotation.XMock;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,22 +15,28 @@ public class DemoMain {
 
     private String name;
 
-    public static void main(String[] args) {
-//               if( ctClass.hasAnnotation("org.xiong.xmock.engine.annotation.XMock")
-//                   || ctClass.hasAnnotation("org.springframework.boot.autoconfigure.SpringBootApplication")){
-//                   for ( CtMethod m : methods ){
-//                       if ( m.getLongName().contains(".mian")){
-//                           m.insertBefore("{ new org.xiong.xmock.engine.Xmock().doMock($0,\"appserver.mock\",null); }");
-//                           return ctClass.toBytecode();
-//                       }
-//                   }
-//               }
+    private String wocao;
+
+    public String getName()  {
+        return this.name;
     }
 
-    public Map<String,String> hello(){
-        System.out.println("第一个字节码修改。。。");
+    public String hello()  {
+      return getPrivate();
+    }
+
+    public FacadeService getFacadeService(){
         return null;
     }
+
+     private String getPrivate(){
+        return "default private";
+    }
+
+    private String getPrivate(String bb,Map<String,DemoMain> ma){
+        return "default private";
+    }
+
 
     public String getMgs(){
       return "第二个字节码修改。。。";

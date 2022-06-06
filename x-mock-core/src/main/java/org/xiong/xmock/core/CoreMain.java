@@ -5,8 +5,7 @@ import org.xiong.xmock.core.agent.PremainArgWrapper;
 
 public class CoreMain  {
 
-    @SneakyThrows
-    public static void preStart( PremainArgWrapper rremainArgWrapper) {
+    public static void preStart( PremainArgWrapper rremainArgWrapper) throws Exception {
         try {
             new XCombination( rremainArgWrapper ).execute();
         } catch (Exception e) {

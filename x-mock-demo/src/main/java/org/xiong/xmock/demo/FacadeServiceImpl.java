@@ -3,6 +3,7 @@ package org.xiong.xmock.demo;
 import java.util.List;
 import java.util.Map;
 
+
 public class FacadeServiceImpl implements FacadeService{
 
     public DemoItem getDemoMain(String arg,Map<String,List<DemoItem>> map) {

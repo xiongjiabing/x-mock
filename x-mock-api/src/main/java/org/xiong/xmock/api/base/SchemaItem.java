@@ -1,10 +1,12 @@
 package org.xiong.xmock.api.base;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 public class SchemaItem {
     boolean isReturn;
     String forName;
+    String type;
     String sleep;
     String throwError;
     String testScope;
@@ -23,7 +25,8 @@ public class SchemaItem {
                 this.forName = this.forName.concat("(");
             }
             String forNamePrefix = this.forName.substring( 0 ,this.forName.indexOf("(") );
-            this.mockTargetClassSimpleName = forNamePrefix.substring( 0, forNamePrefix.lastIndexOf(".") );
+            if(StringUtils.isNotBlank(forNamePrefix))
+             this.mockTargetClassSimpleName = forNamePrefix.substring( 0, forNamePrefix.lastIndexOf(".") );
         }
         return this.mockTargetClassSimpleName;
     }
@@ -34,6 +37,7 @@ public class SchemaItem {
             String forNamePrefix = this.forName.substring(0, this.forName.indexOf("("));
             String methodSign = this.forName.substring(this.forName.indexOf("("));
 
+            if(StringUtils.isNotBlank(forNamePrefix))
             this.mockTargetMethodName = forNamePrefix
                     .substring(forNamePrefix.lastIndexOf(".") + 1).concat(methodSign);
         }

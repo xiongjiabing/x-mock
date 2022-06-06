@@ -1,8 +1,8 @@
 package org.xiong.xmock.engine;
 import lombok.SneakyThrows;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.xiong.xmock.api.base.TestCaseMetadata;
 
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
@@ -20,7 +20,10 @@ public class ReflectionUtils {
     @SneakyThrows
     public static Class<?> getClass(String s)  {
         try {
-            return Class.forName(s);
+            //return Class.forName(s,true,Thread.currentThread().getContextClassLoader() ) ;
+            return TestCaseMetadata.xmockClassLoader.loadClass(s);
+            //return Class.forName(s,true,Thread.currentThread().getContextClassLoader() ) ;
+            //return Class.forName(s);
         } catch (Throwable e) {
             throw e;
         }
@@ -37,7 +40,7 @@ public class ReflectionUtils {
 
     public static Object newObject( String clsName ) {
         try {
-            Class<?> cls = Class.forName(clsName);
+            Class<?> cls =  Class.forName(clsName,true,Thread.currentThread().getContextClassLoader() ) ;
             Constructor<?> cons = cls.getDeclaredConstructor();
             return cons.newInstance(new Object[]{});
         } catch (Throwable e) {
@@ -78,7 +81,7 @@ public class ReflectionUtils {
             return null;
         }
         Class cla = (Class) type;
-        JavaType javaType = TypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0]);
+        JavaType javaType = XmockTypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0]);
         Class<?> res = javaType.getRawClass();
 
         if( res.isPrimitive() ){
@@ -164,11 +167,12 @@ public class ReflectionUtils {
                 //泛型也可能带有泛型，递归获取
                 javaTypes[i] = getJavaType( actualTypeArguments[i] );
             }
-            return TypeFactory.defaultInstance().constructParametricType(rowClass, javaTypes);
+            return XmockTypeFactory.defaultInstance().constructParametricType(rowClass, javaTypes);
         } else {
 
             Class cla = (Class) type;
-            return TypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0] );
+            return XmockTypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0] );
+            //return TypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0] );
         }
     }
 
@@ -195,6 +199,7 @@ public class ReflectionUtils {
                 if( anno.annotationType().getName().equals("org.springframework.stereotype.Service")
                         || anno.annotationType().getName().equals("org.springframework.stereotype.Component")
                         || anno.annotationType().getName().equals("org.springframework.web.bind.annotation.RestController")
+                        || anno.annotationType().getName().equals("org.springframework.stereotype.Controller")
                         || anno.annotationType().getName().equals("org.xiong.xmock.engine.annotation.XMock")
                         || anno.annotationType().getName().equals("org.junit.runner.RunWith")
                 ){
@@ -270,6 +275,8 @@ public class ReflectionUtils {
                     targetServiceName = serviceName.get(serviceAliasName);
                 }
             }
+//            assignment(f, proxyType, sourceInstance, proxyValue , fieldAnno);
+//            injectByType( proxyType ,getFieldValue(f, sourceInstance) ,proxyValue,serviceName, fieldAnno );
 
             if( !isBlank( serviceAliasName )
                     || !isBlank( targetServiceName )
@@ -354,18 +361,74 @@ public class ReflectionUtils {
     static boolean assignment(Field f , Class type
             ,Object instance,Object value,String ... fieldAnno ){
 
-        if( hasAnnotation( f, fieldAnno )
+        if(type.isInterface()
                 && f.getType().isAssignableFrom(type)){
-            f.setAccessible(true);
             try {
+                f.setAccessible(true);
                 f.set(instance,value);
                 return true;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
+
+        if( f.getType().isAssignableFrom(type)
+                && hasAnnotation( f, fieldAnno )){
+            try {
+                init( getFieldValue(f, instance),value);
+                f.setAccessible(true);
+                f.set(instance,value);
+
+                return true;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
         return false;
     }
+
+
+    @SneakyThrows
+    static void init(Object sourceBean, Object newBean ) {
+        if(sourceBean == null){
+            return;
+        }
+
+        Field[] newBeanFields = newBean.getClass().getDeclaredFields();
+        Field[] sourceBeanFields = sourceBean.getClass().getDeclaredFields();
+        if( sourceBeanFields != null && sourceBeanFields.length > 0 ){
+
+            for ( Field f : sourceBeanFields ){
+                Object fieldValue = getFieldValue(f , sourceBean );
+                Field field = getField( f.getName(), newBeanFields );
+
+                if (field == null || Modifier.isStatic(field.getModifiers())){
+                    continue;
+                }
+                field.setAccessible(true);
+                try {
+                    field.set( newBean,fieldValue );
+                } catch (IllegalAccessException e) {
+                    System.out.println("copy sourceBean value error "+e.getMessage());
+                    throw new RuntimeException(" copy sourceBean value error " );
+                }
+            }
+        }
+    }
+
+
+    static Field getField( String fieldName, Field[] fields ){
+        if( fields != null && fields.length > 0 ){
+            for ( Field f : fields ){
+                if( fieldName.equals( f.getName() )){
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
+
 
     static Object getFieldValue( Field field, Object o ) {
         try {

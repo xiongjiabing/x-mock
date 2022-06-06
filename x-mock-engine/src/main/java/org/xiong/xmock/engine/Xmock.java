@@ -2,17 +2,23 @@ package org.xiong.xmock.engine;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.xiong.xmock.api.base.*;
+import org.xiong.xmock.engine.proxy.utils.JavassistProxyFactory;
 import java.lang.reflect.Method;
-import lombok.SneakyThrows;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class Xmock {
 
-    public void doMock( Object source,String testClassName, String testScope ){
+    public Xmock(){
+    }
+
+
+    public void doMockTest( Object source,String testClassName, String testScope ){
         TestCaseMetadata.agentInitComplete();
         try{
             if ( EngineProcessor.mockHasComplete( source )){
@@ -22,15 +28,54 @@ public class Xmock {
             SchemaItemManager.obtainActualSchemaItem( testClassName, testScope )
                     .forEach(( targetMockClassName ,methodMapping )->{
 
-                        Object mockInstance;
+                        Object mockInstance = null;
                         Class clazz = ReflectionUtils.getClass( targetMockClassName );
                         if( clazz.isInterface() ){
                             //if interface, by manual generate proxy object
-                            mockInstance = JavassistProxyFactory.getProxy( clazz , JavassistProxyFactory.getHandler( methodMapping ));
+                            mockInstance = JavassistProxyFactory.getProxy( clazz ,methodMapping, JavassistProxyFactory.getHandler( methodMapping ));
+                            ReflectionUtils.inject( clazz,source,mockInstance,serviceName
+                                    ,"org.xiong.xmock.engine.annotation.AutoInject"
+                                    ,"javax.annotation.Resource"
+                                    ,"org.springframework.beans.factory.annotation.Autowired" );
+                        }
+//                        else {
+//                            try{
+//                                mockInstance = clazz.newInstance();
+//                                ReflectionUtils.inject( clazz,source,mockInstance,serviceName
+//                                        ,"org.xiong.xmock.engine.annotation.AutoInject");
+//                            }catch (Exception e){ e.printStackTrace();}
+//                        }
+                    });
+        } catch ( Exception e ){
+            throw e;
+        } finally {
+            EngineProcessor.mockComplete( source );
+        }
+    }
+
+
+    // v1 版本 已作废
+    @Deprecated
+    public void doMockTest1( Object source,String testClassName, String testScope ){
+        TestCaseMetadata.agentInitComplete();
+        try{
+            if ( EngineProcessor.mockHasComplete( source )){
+                return;
+            }
+            Map<String,String> serviceName = SchemaItemManager.getServiceName( testClassName );
+            SchemaItemManager.obtainActualSchemaItem( testClassName, testScope )
+                    .forEach(( targetMockClassName ,methodMapping )->{
+
+                        Object mockInstance = null;
+                        Class clazz = ReflectionUtils.getClass( targetMockClassName );
+                        if( clazz.isInterface() ){
+                            //if interface, by manual generate proxy object
+                            mockInstance = JavassistProxyFactory.getProxy( clazz ,methodMapping, JavassistProxyFactory.getHandler( methodMapping ));
 
                         } else {
                             // if ordinary Class,by high-level api generate proxy object
-                            mockInstance = mock( clazz );
+                           //mockInstance = mock( clazz );
+                           mockInstance = JavassistProxyFactory.getProxyClass( clazz,methodMapping,JavassistProxyFactory.getHandler( methodMapping));
 
                             Service serviceAnno =  (Service)clazz.getDeclaredAnnotation( Service.class );
                             String service = null;
@@ -49,7 +94,6 @@ public class Xmock {
 
                                 serviceName.put( service, clazz.getName() );
                             }
-                            new Binder( mockInstance,methodMapping ).bindReturnHandler();
                         }
 
                         //by x-mock framework inject
@@ -64,6 +108,7 @@ public class Xmock {
             EngineProcessor.mockComplete( source );
         }
     }
+
 
     @SneakyThrows
     static<T> T mock(Class<T> clazz ) {
@@ -94,7 +139,7 @@ public class Xmock {
         public void bindReturnHandler() {
             MethodHandler handler = new MethodHandler() {
                 @Override
-                public Object invoke( Object self, Method overridden, Method proceed, Object[] args ) throws Throwable {
+                public Object invoke(Object self, Method overridden, Method proceed, Object[] args ) throws Throwable {
                     final String signature = overridden.toString();
                     AtomicReference<SchemaItem> schemaItemReference = new AtomicReference();
                     mappings.forEach( (k,v) ->{
@@ -110,5 +155,6 @@ public class Xmock {
             ((ProxyObject) mock).setHandler(handler);
         }
     }
+
 
 }

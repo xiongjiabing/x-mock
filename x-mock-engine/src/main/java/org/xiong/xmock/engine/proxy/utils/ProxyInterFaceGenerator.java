@@ -1,20 +1,24 @@
-package org.xiong.xmock.engine;
+package org.xiong.xmock.engine.proxy.utils;
 import javassist.*;
+import org.xiong.xmock.api.base.SchemaItem;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ProxyGenerator {
+public class ProxyInterFaceGenerator {
 
     private static final AtomicInteger counter = new AtomicInteger(1);
 
     private static ConcurrentHashMap<Class<?>, Object> proxyInstanceCache = new ConcurrentHashMap<>();
 
-    public static Object newProxyInstance(ClassLoader classLoader, Class<?> intf, InvocationHandler invocationHandler)
+    public static Object newProxyInstance(ClassLoader classLoader, Class<?> intf
+            , Map<String, SchemaItem> mappings,InvocationHandler invocationHandler)
             throws Exception {
 
         if(proxyInstanceCache.containsKey(intf)){
@@ -47,6 +51,10 @@ public class ProxyGenerator {
 
         Method[] arr = intf.getDeclaredMethods();
         for (Method method : arr) {
+            if(!mappings.keySet().stream().anyMatch(r->r.contains(method.getName()))){
+                continue;
+            }
+
             int ix = methods.size();
             Class<?> rt = method.getReturnType();
             Class<?>[] pts = method.getParameterTypes();

@@ -1,9 +1,14 @@
 package org.xiong.xmock.api.base;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaItemManager {
 
+    static List<SchemaItem> globalList = new ArrayList<>();
     static final Map<String, List<SchemaItem>> testClassMapping = new HashMap<>();
 
     public static Map<String,Map<String,SchemaItem>> obtainActualSchemaItem( String testClassName, String testScope ){
@@ -14,7 +19,7 @@ public class SchemaItemManager {
 
         })).ifPresent( schemaItems->{schemaItems.forEach( item->{
 
-                if( isBlank( item.getTestScope() ) || item.getTestScope().contains( testScope ) ){
+                if( isBlank( item.getTestScope() ) || item.getTestScope().equals( testScope ) ){
                     Map<String,SchemaItem> schemaItemMap = mockClassMapping.get( item.getMockTargetClassSimpleName());
                     if( schemaItemMap == null ){
                         schemaItemMap = new HashMap<>();
@@ -51,5 +56,18 @@ public class SchemaItemManager {
 
     public static void addTestClassMapping(String testClass, List<SchemaItem> items ){
         testClassMapping.put(testClass, items );
+    }
+
+    public static List<SchemaItem> getTestClassMapping(String testClass){
+        if(StringUtils.isNotBlank(testClass)) {
+             return testClassMapping.get(testClass);
+        }else {
+            if(globalList != null && globalList.size() > 0)
+                return globalList;
+
+            globalList = testClassMapping.values().stream()
+                    .flatMap(itmes->itmes.stream()).distinct().collect(Collectors.toList());
+        }
+        return globalList;
     }
 }

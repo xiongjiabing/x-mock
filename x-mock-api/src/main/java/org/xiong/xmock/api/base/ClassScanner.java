@@ -1,5 +1,6 @@
 package org.xiong.xmock.api.base;
 
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Resource;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
@@ -24,6 +26,34 @@ public enum ClassScanner {
 	;
 	public static enum ProtocolTypes {
 		http, https, file, jar;
+	}
+
+
+	/**
+	 *
+	 * 加载指定路径下的class
+	 * @param urls
+	 * @return Class
+	 */
+	public static List<Class> loadClassByUrls(URL[] urls){
+		List<Class> classList = new LinkedList<Class>();
+		try{
+			for (URL url: urls) {
+
+				File fileJar = new File(url.toURI());
+				if(!fileJar.getPath().endsWith(".jar")){
+					continue;
+				}
+
+				String jarPath = url.getFile();
+				if( jarPath.lastIndexOf("!") != -1){
+					jarPath = jarPath.substring(0, jarPath.lastIndexOf("!")).replaceFirst("file:", "");
+				}
+				classList.addAll(recursiveScan4Jar("", jarPath));
+			}
+		}catch (Exception e){
+		}
+		return classList;
 	}
 
 	/**
@@ -146,6 +176,85 @@ public enum ClassScanner {
 		return classList;
 	}
 
+
+
+	public static List<String> scanOnePkg(String pkg) {
+		List<String> classList = new LinkedList<>();
+		try {
+			// 包名转化为路径名
+			String pathName = package2Path(pkg);
+			// 获取路径下URL
+			Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(pathName);
+			// 循环扫描路径
+			classList = scanFilePath(pkg, urls);
+		} catch (IOException e) {
+			System.err.println("Warning: Can not scan pkg：" + pkg);
+		}
+
+		return classList;
+	}
+
+
+	private static List<String> scanFilePath(String pkg, Enumeration<URL> urls) throws IOException {
+		List<String> classList = new LinkedList<String>();
+		while (urls.hasMoreElements()) {
+			URL url = urls.nextElement();
+
+			// 获取协议
+			String protocol = url.getProtocol();
+
+			if (ProtocolTypes.file.name().equals(protocol)) {
+				// 文件
+				String path = URLDecoder.decode(url.getFile(), "UTF-8");
+				classList.addAll(recursiveScanMockPath(pkg, path));
+			}
+		}
+		return classList;
+	}
+
+	private static List<String> recursiveScanMockPath(String pkg, String filePath) {
+		List<String> classList = new LinkedList<String>();
+
+		File file = new File(filePath);
+		if (!file.exists() || !file.isDirectory()) {
+			return classList;
+		}
+
+		// 处理类文件
+		File[] classes = file.listFiles(new FileFilter() {
+			public boolean accept(File child) {
+				if (child.getName() == null || child.getName().length() == 0) {
+					return false;
+				}
+				return child.getName().endsWith(".mock");
+			}
+		});
+		for (File child : classes) {
+			try {
+				classList.add(child.getPath().substring(child.getPath().indexOf("mockfile")));
+			} catch (Exception e) {
+			}
+		}
+
+		// 处理目录
+
+		File[] dirs = file.listFiles(new FileFilter() {
+			public boolean accept(File f) {
+				return f.isDirectory();
+			}
+		});
+
+		for (File child : dirs) {
+			String childPackageName = new StringBuilder().append(pkg).append(".").append(child.getName()).toString();
+			String childPath = new StringBuilder().append(filePath).append("/").append(child.getName()).toString();
+			classList.addAll(recursiveScanMockPath(childPackageName, childPath));
+		}
+
+		return classList;
+	}
+
+
+
 	/**
 	 * get real path from url 从url中获取jar真实路径
 	 * <p>
@@ -156,11 +265,12 @@ public enum ClassScanner {
 	 * @param url
 	 * @return
 	 */
-	private static String getJarPathFormUrl(URL url) {
+	public static String getJarPathFormUrl(URL url) {
 		String file = url.getFile();
 		String jarRealPath = file.substring(0, file.lastIndexOf("!")).replaceFirst("file:", "");
 		return jarRealPath;
 	}
+
 
 	/**
 	 * recursive scan for path 递归扫描指定文件路径下的Class文件
